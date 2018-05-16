@@ -77,7 +77,6 @@ public class View extends javax.swing.JFrame {
         Graphics g = jPanel1.getGraphics();
         g.setColor(Color.red);
         g.fillOval (evt.getX(), evt.getY(), 5, 5);
-        g.setColor(Color.blue);
     }//GEN-LAST:event_jPanel1MouseClicked
 
     /**

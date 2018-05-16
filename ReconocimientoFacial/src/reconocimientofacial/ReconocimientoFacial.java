@@ -7,6 +7,8 @@ package reconocimientofacial;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -61,17 +63,11 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        btnImage = new javax.swing.JButton();
         btnEscogerImagen1 = new javax.swing.JButton();
         label = new javax.swing.JLabel();
+        labelImagen = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        btnImage.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                btnImageMouseClicked(evt);
-            }
-        });
 
         btnEscogerImagen1.setBackground(java.awt.SystemColor.textHighlight);
         btnEscogerImagen1.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
@@ -85,20 +81,23 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
 
         label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
+        labelImagen.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelImagenMouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(163, 163, 163)
-                        .addComponent(btnEscogerImagen1, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 491, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(71, 71, 71)
-                        .addComponent(btnImage, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(163, 163, 163)
+                .addComponent(btnEscogerImagen1, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 491, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(74, 74, 74)
+                .addComponent(labelImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 362, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -107,16 +106,28 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
                 .addComponent(btnEscogerImagen1, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnImage, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(labelImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 372, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnImageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnImageMouseClicked
+    private void btnEscogerImagen1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEscogerImagen1ActionPerformed
         // TODO add your handling code here:
+        imagenMeta = new int[11][2];
+        distanciaMeta = new double[11][11];
+        distancia = new double[6];
+        actualClick = 0;
+        abrirImagen();
+    }//GEN-LAST:event_btnEscogerImagen1ActionPerformed
+
+    private void labelImagenMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelImagenMouseClicked
+        // TODO add your handling code here:
+        Graphics g = labelImagen.getGraphics();
+        g.setColor(Color.red);
+        g.fillOval (evt.getX(), evt.getY(), 5, 5);
         if (actualClick == 10) {
             calcularDistanciasMeta();
             normalizar();
@@ -160,22 +171,13 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
                     break;
             }
         }
-    }//GEN-LAST:event_btnImageMouseClicked
-
-    private void btnEscogerImagen1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEscogerImagen1ActionPerformed
-        // TODO add your handling code here:
-        imagenMeta = new int[11][2];
-        distanciaMeta = new double[11][11];
-        distancia = new double[6];
-        actualClick = 0;
-        abrirImagen();
-    }//GEN-LAST:event_btnEscogerImagen1ActionPerformed
+    }//GEN-LAST:event_labelImagenMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEscogerImagen1;
-    private javax.swing.JButton btnImage;
     private javax.swing.JLabel label;
+    private javax.swing.JLabel labelImagen;
     // End of variables declaration//GEN-END:variables
 
     public void abrirImagen() {
@@ -185,8 +187,8 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             ImageIcon image = new ImageIcon(fc.getSelectedFile().getAbsolutePath());
             Icon i = new ImageIcon(image.getImage());
-            Icon icon = new ImageIcon(image.getImage().getScaledInstance((i.getIconWidth()*btnImage.getHeight())/i.getIconHeight(), btnImage.getHeight(), Image.SCALE_DEFAULT));
-            btnImage.setIcon(icon);
+            Icon icon = new ImageIcon(image.getImage().getScaledInstance((i.getIconWidth()*labelImagen.getHeight())/i.getIconHeight(), labelImagen.getHeight(), Image.SCALE_DEFAULT));
+            labelImagen.setIcon(icon);
         }
         label.setText("Haga Click en el punto central de la línea de cabello");
     }
