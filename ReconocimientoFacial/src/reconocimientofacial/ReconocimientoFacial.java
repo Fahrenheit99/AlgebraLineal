@@ -31,6 +31,8 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
     public int[][] imagenMeta;
     public double[][] distanciaMeta;
     public double[] distancia;
+    public double m;
+    public double b;
     public int actualClick;
     ArrayList<String> nombres = new ArrayList<>();
 
@@ -45,12 +47,17 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         imagenMeta = new int[11][2];
         distanciaMeta = new double[11][11];
         distancia = new double[6];
-        nombres.add("Adele");
+        nombres.add("Tom Cruise");
         nombres.add("Brad Pitt");
-        nombres.add("Felicity Jones");
         nombres.add("Keanu Reeves");
         nombres.add("Keira Knightley");
-        nombres.add("Tom Cruise");
+        nombres.add("Felicity Jones");
+        nombres.add("Adele");
+        
+        
+        
+        
+        
         this.setLocationRelativeTo(null);
     }
 
@@ -127,10 +134,16 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         // TODO add your handling code here:
         Graphics g = labelImagen.getGraphics();
         g.setColor(Color.red);
-        g.fillOval (evt.getX(), evt.getY(), 5, 5);
+        g.fillOval(evt.getX(), evt.getY(), 5, 5);
         if (actualClick == 10) {
             calcularDistanciasMeta();
             normalizar();
+            calcularRecta();
+            System.out.println("m"+m+"b"+b);
+            for (int i = 0; i<6 ; i++)
+            {
+                System.out.println("m: "+View.rectas[i][0]+", b: "+View.rectas[i][1]);
+            }
             calcularDistancias();
             resultado();
         } else {
@@ -187,7 +200,7 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             ImageIcon image = new ImageIcon(fc.getSelectedFile().getAbsolutePath());
             Icon i = new ImageIcon(image.getImage());
-            Icon icon = new ImageIcon(image.getImage().getScaledInstance((i.getIconWidth()*labelImagen.getHeight())/i.getIconHeight(), labelImagen.getHeight(), Image.SCALE_DEFAULT));
+            Icon icon = new ImageIcon(image.getImage().getScaledInstance((i.getIconWidth() * labelImagen.getHeight()) / i.getIconHeight(), labelImagen.getHeight(), Image.SCALE_DEFAULT));
             labelImagen.setIcon(icon);
         }
         label.setText("Haga Click en el punto central de la línea de cabello");
@@ -213,23 +226,25 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         }
     }
 
-    private  void resultado() {
+    private void resultado() {
         double result = distancia[0];
         int person = 0;
         String s = "";
         for (int x = 0; x < distancia.length; x++) {
-            s += nombres.get(x)+ ": "+distancia[x] + "\n";
+            s += nombres.get(x) + ": " + distancia[x] + "\n";
             if (result > distancia[x]) {
                 result = distancia[x];
                 person = x;
             }
         }
-        JOptionPane.showMessageDialog(this, "La imagen pertenece a la cara de: " + nombres.get(person)+"\n\n"+ s );
+        JOptionPane.showMessageDialog(this, "La imagen pertenece a la cara de: " + nombres.get(person) + "\n\n" + s);
     }
 
     private void Open() throws FileNotFoundException {
-        reader = new FileReader("base.xml");
+        reader = new FileReader("distancias.xml");
         View.distancias = (double[][][]) (xstream.fromXML(reader));
+        reader = new FileReader("rectas.xml");
+        View.rectas = (double[][]) (xstream.fromXML(reader));
     }
 
     private void normalizar() {
@@ -246,5 +261,21 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
                 distanciaMeta[x][y] = distanciaMeta[x][y] / maximo;
             }
         }
+    }
+
+    private void calcularRecta() {
+        double sumatoriaxy = 0;
+        double sumatoriax2 = 0;
+        double sumatoriax = 0;
+        double sumatoriay = 0;
+        for (int x = 0; x < 11; x++) {
+            sumatoriax += imagenMeta[x][0];
+            sumatoriay += imagenMeta[x][1];
+            sumatoriaxy += imagenMeta[x][0] * imagenMeta[x][1];
+            sumatoriax2 += imagenMeta[x][0] * imagenMeta[x][0];
+        }
+        m = (sumatoriaxy - (sumatoriax * sumatoriay / 11)) / (sumatoriax2 - ((sumatoriax * sumatoriax) / 11));
+        b = (sumatoriay / 11) - (m * (sumatoriax / 11));
+
     }
 }

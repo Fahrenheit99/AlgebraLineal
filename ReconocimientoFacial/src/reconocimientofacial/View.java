@@ -7,6 +7,8 @@ package reconocimientofacial;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -28,6 +30,7 @@ public class View extends javax.swing.JFrame {
     public static double[][][] distancias;
     int actualImage;
     int actualClick;
+    public static double[][] rectas;
 
     /**
      * Creates new form View
@@ -36,6 +39,7 @@ public class View extends javax.swing.JFrame {
         initComponents();
         imagenes = new int[6][11][2];
         distancias = new double[6][11][11];
+        rectas = new double[6][2];
         actualImage = 0;
         actualClick = 0;
         this.setLocationRelativeTo(null);
@@ -52,7 +56,7 @@ public class View extends javax.swing.JFrame {
 
         btnEscogerImagen = new javax.swing.JButton();
         label = new javax.swing.JLabel();
-        btnImage = new javax.swing.JButton();
+        labelImagen = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -68,9 +72,9 @@ public class View extends javax.swing.JFrame {
 
         label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
-        btnImage.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                btnImageMouseClicked(evt);
+        labelImagen.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                labelImagenMousePressed(evt);
             }
         });
 
@@ -79,14 +83,17 @@ public class View extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 491, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(163, 163, 163)
-                .addComponent(btnEscogerImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(70, 70, 70)
-                .addComponent(btnImage, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 491, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(163, 163, 163)
+                        .addComponent(btnEscogerImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(70, 70, 70)
+                        .addComponent(labelImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -95,9 +102,9 @@ public class View extends javax.swing.JFrame {
                 .addComponent(btnEscogerImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(29, 29, 29)
                 .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31)
-                .addComponent(btnImage, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(25, 25, 25))
+                .addGap(18, 18, 18)
+                .addComponent(labelImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(38, 38, 38))
         );
 
         pack();
@@ -108,11 +115,16 @@ public class View extends javax.swing.JFrame {
         abrirImagen();
     }//GEN-LAST:event_btnEscogerImagenActionPerformed
 
-    private void btnImageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnImageMouseClicked
-         if (actualClick == 10) {
+    private void labelImagenMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelImagenMousePressed
+        // TODO add your handling code here:
+        Graphics g = labelImagen.getGraphics();
+        g.setColor(Color.red);
+        g.fillOval(evt.getX(), evt.getY(), 5, 5); 
+        if (actualClick == 10) {
             if (actualImage == 5) {
                 calcularDistanciasBase();
                 normalizar();
+                calcularRecta();
                 try {
                     Save();
                 } catch (FileNotFoundException ex) {
@@ -165,12 +177,12 @@ public class View extends javax.swing.JFrame {
                     break;
             }
         }
-    }//GEN-LAST:event_btnImageMouseClicked
+    }//GEN-LAST:event_labelImagenMousePressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEscogerImagen;
-    private javax.swing.JButton btnImage;
     private javax.swing.JLabel label;
+    private javax.swing.JLabel labelImagen;
     // End of variables declaration//GEN-END:variables
 
     public void abrirImagen() {
@@ -180,8 +192,8 @@ public class View extends javax.swing.JFrame {
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             ImageIcon image = new ImageIcon(fc.getSelectedFile().getAbsolutePath());
             Icon i = new ImageIcon(image.getImage());
-            Icon icon = new ImageIcon(image.getImage().getScaledInstance((i.getIconWidth()*btnImage.getHeight())/i.getIconHeight(), btnImage.getHeight(), Image.SCALE_DEFAULT));
-            btnImage.setIcon(icon);
+            Icon icon = new ImageIcon(image.getImage().getScaledInstance((i.getIconWidth()*labelImagen.getHeight())/i.getIconHeight(), labelImagen.getHeight(), Image.SCALE_DEFAULT));
+            labelImagen.setIcon(icon);
         }
         label.setText("Haga Click en el punto central de la línea de cabello");
     }
@@ -195,10 +207,34 @@ public class View extends javax.swing.JFrame {
             }
         }
     }
+    
+    private void calcularRecta()
+    {
+        for (int i = 0; i < 6; i++) {
+            double sumatoriaxy = 0;
+            double sumatoriax2 = 0;
+            double sumatoriax = 0;
+            double sumatoriay = 0;
+            for (int x = 0; x < 11; x++) {
+                sumatoriax += imagenes[i][x][0];
+                sumatoriay += imagenes[i][x][1];
+                sumatoriaxy += imagenes[i][x][0] * imagenes[i][x][1];
+                sumatoriax2 += imagenes[i][x][0] * imagenes[i][x][0];
+            }
+            double m = (sumatoriaxy-(sumatoriax*sumatoriay/11))/(sumatoriax2-((sumatoriax*sumatoriax)/11));
+            double b = (sumatoriay/11) - (m*(sumatoriax/11));
+            rectas[i][0] = m;
+            rectas[i][1] = b;
+        }        
+    }
 
     private void Save() throws FileNotFoundException {
-        try (PrintWriter outA = new PrintWriter("base.xml")) {
+        try (PrintWriter outA = new PrintWriter("distancias.xml")) {
             String archivo = xstream.toXML(distancias);
+            outA.println(archivo);
+        }
+        try (PrintWriter outA = new PrintWriter("rectas.xml")) {
+            String archivo = xstream.toXML(rectas);
             outA.println(archivo);
         }
     }
