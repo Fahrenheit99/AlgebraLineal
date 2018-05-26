@@ -27,7 +27,7 @@ public class View extends javax.swing.JFrame {
 
     XStream xstream = new XStream(new DomDriver());
     public int[][][] imagenes;
-    public static double[][][] distancias;
+    public static double[][] distancias;
     int actualImage;
     int actualClick;
     public static double[][] rectas;
@@ -38,7 +38,7 @@ public class View extends javax.swing.JFrame {
     public View() {
         initComponents();
         imagenes = new int[6][11][2];
-        distancias = new double[6][11][11];
+        distancias = new double[6][55];
         rectas = new double[6][2];
         actualImage = 0;
         actualClick = 0;
@@ -119,7 +119,7 @@ public class View extends javax.swing.JFrame {
         // TODO add your handling code here:
         Graphics g = labelImagen.getGraphics();
         g.setColor(Color.red);
-        g.fillOval(evt.getX(), evt.getY(), 5, 5); 
+        g.fillOval(evt.getX(), evt.getY(), 5, 5);
         if (actualClick == 10) {
             if (actualImage == 5) {
                 calcularDistanciasBase();
@@ -192,24 +192,28 @@ public class View extends javax.swing.JFrame {
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             ImageIcon image = new ImageIcon(fc.getSelectedFile().getAbsolutePath());
             Icon i = new ImageIcon(image.getImage());
-            Icon icon = new ImageIcon(image.getImage().getScaledInstance((i.getIconWidth()*labelImagen.getHeight())/i.getIconHeight(), labelImagen.getHeight(), Image.SCALE_DEFAULT));
+            Icon icon = new ImageIcon(image.getImage().getScaledInstance((i.getIconWidth() * labelImagen.getHeight()) / i.getIconHeight(), labelImagen.getHeight(), Image.SCALE_DEFAULT));
             labelImagen.setIcon(icon);
         }
         label.setText("Haga Click en el punto central de la línea de cabello");
     }
 
     private void calcularDistanciasBase() {
+        
         for (int i = 0; i < 6; i++) {
+            int cont = 0;
             for (int x = 0; x < 11; x++) {
                 for (int y = 0; y < 11; y++) {
-                    distancias[i][x][y] = Math.hypot((imagenes[i][x][0] - imagenes[i][y][0]), (imagenes[i][x][1] - imagenes[i][y][1]));
+                    if (x < y) {
+                        distancias[i][cont] = Math.hypot((imagenes[i][x][0] - imagenes[i][y][0]), (imagenes[i][x][1] - imagenes[i][y][1]));
+                        cont++;
+                    }
                 }
             }
         }
     }
-    
-    private void calcularRecta()
-    {
+
+    private void calcularRecta() {
         for (int i = 0; i < 6; i++) {
             double sumatoriaxy = 0;
             double sumatoriax2 = 0;
@@ -221,11 +225,11 @@ public class View extends javax.swing.JFrame {
                 sumatoriaxy += imagenes[i][x][0] * imagenes[i][x][1];
                 sumatoriax2 += imagenes[i][x][0] * imagenes[i][x][0];
             }
-            double m = (sumatoriaxy-(sumatoriax*sumatoriay/11))/(sumatoriax2-((sumatoriax*sumatoriax)/11));
-            double b = (sumatoriay/11) - (m*(sumatoriax/11));
+            double m = (sumatoriaxy - (sumatoriax * sumatoriay / 11)) / (sumatoriax2 - ((sumatoriax * sumatoriax) / 11));
+            double b = (sumatoriay / 11) - (m * (sumatoriax / 11));
             rectas[i][0] = m;
             rectas[i][1] = b;
-        }        
+        }
     }
 
     private void Save() throws FileNotFoundException {
@@ -241,18 +245,14 @@ public class View extends javax.swing.JFrame {
 
     private void normalizar() {
         for (int i = 0; i < 6; i++) {
-            double maximo = 0;
-            for (int x = 0; x < 11; x++) {
-                for (int y = 0; y < 11; y++) {
-                    if (distancias[i][x][y] > maximo) {
-                        maximo = distancias[i][x][y];
-                    }
-                }
-            }
-            for (int x = 0; x < 11; x++) {
-                for (int y = 0; y < 11; y++) {
-                    distancias[i][x][y] = distancias[i][x][y] / maximo;
-                }
+//            double maximo = 0;
+//            for (int x = 0; x < 55; x++) {
+//                if (distancias[i][x] > maximo) {
+//                    maximo = distancias[i][x];
+//                }
+//            }
+            for (int x = 0; x < 55; x++) {
+                distancias[i][x] = distancias[i][x] / distancias[i][45];
             }
         }
     }

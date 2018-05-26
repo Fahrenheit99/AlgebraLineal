@@ -29,8 +29,9 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
     XStream xstream = new XStream(new DomDriver());
     FileReader reader = null;
     public int[][] imagenMeta;
-    public double[][] distanciaMeta;
+    public double[] distanciaMeta;
     public double[] distancia;
+    public double[] distanciaRecta;
     public double m;
     public double b;
     public int actualClick;
@@ -45,19 +46,16 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         Open();
         initComponents();
         imagenMeta = new int[11][2];
-        distanciaMeta = new double[11][11];
+        distanciaMeta = new double[55];
         distancia = new double[6];
+        distanciaRecta = new double[6];
         nombres.add("Tom Cruise");
         nombres.add("Brad Pitt");
         nombres.add("Keanu Reeves");
         nombres.add("Keira Knightley");
         nombres.add("Felicity Jones");
         nombres.add("Adele");
-        
-        
-        
-        
-        
+
         this.setLocationRelativeTo(null);
     }
 
@@ -124,7 +122,7 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
     private void btnEscogerImagen1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEscogerImagen1ActionPerformed
         // TODO add your handling code here:
         imagenMeta = new int[11][2];
-        distanciaMeta = new double[11][11];
+        distanciaMeta = new double[55];
         distancia = new double[6];
         actualClick = 0;
         abrirImagen();
@@ -136,16 +134,7 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         g.setColor(Color.red);
         g.fillOval(evt.getX(), evt.getY(), 5, 5);
         if (actualClick == 10) {
-            calcularDistanciasMeta();
-            normalizar();
-            calcularRecta();
-            System.out.println("m"+m+"b"+b);
-            for (int i = 0; i<6 ; i++)
-            {
-                System.out.println("m: "+View.rectas[i][0]+", b: "+View.rectas[i][1]);
-            }
-            calcularDistancias();
-            resultado();
+            terminar();
         } else {
             int x = evt.getX();
             int y = evt.getY();
@@ -207,9 +196,13 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
     }
 
     private void calcularDistanciasMeta() {
+        int cont = 0;
         for (int x = 0; x < 11; x++) {
             for (int y = 0; y < 11; y++) {
-                distanciaMeta[x][y] = Math.hypot((imagenMeta[x][0] - imagenMeta[y][0]), (imagenMeta[x][1] - imagenMeta[y][1]));
+                if (x < y) {
+                    distanciaMeta[cont] = Math.hypot((imagenMeta[x][0] - imagenMeta[y][0]), (imagenMeta[x][1] - imagenMeta[y][1]));
+                    cont++;
+                }
             }
         }
     }
@@ -217,10 +210,8 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
     private void calcularDistancias() {
         for (int i = 0; i < 6; i++) {
             double distance = 0;
-            for (int x = 0; x < 11; x++) {
-                for (int y = 0; y < 11; y++) {
-                    distance += Math.abs(View.distancias[i][x][y] - distanciaMeta[x][y]);
-                }
+            for (int x = 0; x < 55; x++) {
+                distance += Math.abs(View.distancias[i][x] - distanciaMeta[x]);
             }
             distancia[i] = distance;
         }
@@ -242,24 +233,20 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
 
     private void Open() throws FileNotFoundException {
         reader = new FileReader("distancias.xml");
-        View.distancias = (double[][][]) (xstream.fromXML(reader));
+        View.distancias = (double[][]) (xstream.fromXML(reader));
         reader = new FileReader("rectas.xml");
         View.rectas = (double[][]) (xstream.fromXML(reader));
     }
 
     private void normalizar() {
-        double maximo = 0;
-        for (int x = 0; x < 11; x++) {
-            for (int y = 0; y < 11; y++) {
-                if (distanciaMeta[x][y] > maximo) {
-                    maximo = distanciaMeta[x][y];
-                }
-            }
-        }
-        for (int x = 0; x < 11; x++) {
-            for (int y = 0; y < 11; y++) {
-                distanciaMeta[x][y] = distanciaMeta[x][y] / maximo;
-            }
+//        double maximo = 0;
+//        for (int x = 0; x < 55; x++) {
+//            if (distanciaMeta[x] > maximo) {
+//                maximo = distanciaMeta[x];
+//            } 
+//        }
+        for (int x = 0; x < 55; x++) {
+            distanciaMeta[x] = distanciaMeta[x] / distanciaMeta[45];
         }
     }
 
@@ -276,6 +263,47 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         }
         m = (sumatoriaxy - (sumatoriax * sumatoriay / 11)) / (sumatoriax2 - ((sumatoriax * sumatoriax) / 11));
         b = (sumatoriay / 11) - (m * (sumatoriax / 11));
+
+    }
+
+    private void calcularDistanciasRecta() {
+        double x = interseccionX(b, m);
+        for (int i = 0; i < 6; i++) {
+            double xi = interseccionX(View.rectas[i][1], View.rectas[i][0]);
+            double distance = Math.abs(x - xi) + Math.abs(b - View.rectas[i][1]);
+            distanciaRecta[i] = distance;
+        }
+    }
+
+    private void resultadoRecta() {
+        double result = distanciaRecta[0];
+        int person = 0;
+        String s = "";
+        for (int x = 0; x < distanciaRecta.length; x++) {
+            s += nombres.get(x) + ": " + distanciaRecta[x] + "\n";
+            if (result > distanciaRecta[x]) {
+                result = distanciaRecta[x];
+                person = x;
+            }
+        }
+        JOptionPane.showMessageDialog(this, "La imagen pertenece a la cara de: " + nombres.get(person) + "\n\n" + s);
+    }
+
+    private double interseccionX(double b, double m) {
+        double newb = -b;
+        double result = newb / m;
+        return result;
+    }
+
+    private void terminar() {
+        calcularDistanciasMeta();
+        normalizar();
+        calcularDistancias();
+        resultado();
+
+        calcularRecta();
+        calcularDistanciasRecta();
+        resultadoRecta();
 
     }
 }
