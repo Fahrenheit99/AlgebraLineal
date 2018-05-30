@@ -10,7 +10,6 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -31,11 +30,8 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
     public int[][] imagenMeta;
     public double[] distanciaMeta;
     public double[] distancia;
-    public double[] distanciaRecta;
-    public double m;
-    public double b;
     public int actualClick;
-    ArrayList<String> nombres = new ArrayList<>();
+    
 
     /**
      * Creates new form ReconocimientoFacial
@@ -48,14 +44,7 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         imagenMeta = new int[11][2];
         distanciaMeta = new double[55];
         distancia = new double[6];
-        distanciaRecta = new double[6];
-        nombres.add("Tom Cruise");
-        nombres.add("Brad Pitt");
-        nombres.add("Keanu Reeves");
-        nombres.add("Keira Knightley");
-        nombres.add("Felicity Jones");
-        nombres.add("Adele");
-
+        
         this.setLocationRelativeTo(null);
     }
 
@@ -211,7 +200,7 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         for (int i = 0; i < 6; i++) {
             double distance = 0;
             for (int x = 0; x < 55; x++) {
-                distance += Math.abs(View.distancias[i][x] - distanciaMeta[x]);
+                distance += (View.distancias[i][x] - distanciaMeta[x]) * (View.distancias[i][x] - distanciaMeta[x]);
             }
             distancia[i] = distance;
         }
@@ -222,77 +211,32 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         int person = 0;
         String s = "";
         for (int x = 0; x < distancia.length; x++) {
-            s += nombres.get(x) + ": " + distancia[x] + "\n";
+            s += View.nombres.get(x) + ": " + distancia[x] + "\n";
             if (result > distancia[x]) {
                 result = distancia[x];
                 person = x;
             }
         }
-        JOptionPane.showMessageDialog(this, "La imagen pertenece a la cara de: " + nombres.get(person) + "\n\n" + s);
+        JOptionPane.showMessageDialog(this, "La imagen pertenece a la cara de: " + View.nombres.get(person) + "\n\n" + s);
     }
 
     private void Open() throws FileNotFoundException {
         reader = new FileReader("distancias.xml");
         View.distancias = (double[][]) (xstream.fromXML(reader));
-        reader = new FileReader("rectas.xml");
-        View.rectas = (double[][]) (xstream.fromXML(reader));
+        reader = new FileReader("nombres.xml");
+        View.nombres =  (ArrayList<String>) (xstream.fromXML(reader));
     }
 
     private void normalizar() {
-//        double maximo = 0;
-//        for (int x = 0; x < 55; x++) {
-//            if (distanciaMeta[x] > maximo) {
-//                maximo = distanciaMeta[x];
-//            } 
-//        }
+        double maximo = 0;
         for (int x = 0; x < 55; x++) {
-            distanciaMeta[x] = distanciaMeta[x] / distanciaMeta[45];
-        }
-    }
-
-    private void calcularRecta() {
-        double sumatoriaxy = 0;
-        double sumatoriax2 = 0;
-        double sumatoriax = 0;
-        double sumatoriay = 0;
-        for (int x = 0; x < 11; x++) {
-            sumatoriax += imagenMeta[x][0];
-            sumatoriay += imagenMeta[x][1];
-            sumatoriaxy += imagenMeta[x][0] * imagenMeta[x][1];
-            sumatoriax2 += imagenMeta[x][0] * imagenMeta[x][0];
-        }
-        m = (sumatoriaxy - (sumatoriax * sumatoriay / 11)) / (sumatoriax2 - ((sumatoriax * sumatoriax) / 11));
-        b = (sumatoriay / 11) - (m * (sumatoriax / 11));
-
-    }
-
-    private void calcularDistanciasRecta() {
-        double x = interseccionX(b, m);
-        for (int i = 0; i < 6; i++) {
-            double xi = interseccionX(View.rectas[i][1], View.rectas[i][0]);
-            double distance = Math.abs(x - xi) + Math.abs(b - View.rectas[i][1]);
-            distanciaRecta[i] = distance;
-        }
-    }
-
-    private void resultadoRecta() {
-        double result = distanciaRecta[0];
-        int person = 0;
-        String s = "";
-        for (int x = 0; x < distanciaRecta.length; x++) {
-            s += nombres.get(x) + ": " + distanciaRecta[x] + "\n";
-            if (result > distanciaRecta[x]) {
-                result = distanciaRecta[x];
-                person = x;
+            if (distanciaMeta[x] > maximo) {
+                maximo = distanciaMeta[x];
             }
         }
-        JOptionPane.showMessageDialog(this, "La imagen pertenece a la cara de: " + nombres.get(person) + "\n\n" + s);
-    }
-
-    private double interseccionX(double b, double m) {
-        double newb = -b;
-        double result = newb / m;
-        return result;
+        for (int x = 0; x < 55; x++) {
+            distanciaMeta[x] = distanciaMeta[x] / maximo;
+        }
     }
 
     private void terminar() {
@@ -300,10 +244,5 @@ public class ReconocimientoFacial extends javax.swing.JFrame {
         normalizar();
         calcularDistancias();
         resultado();
-
-        calcularRecta();
-        calcularDistanciasRecta();
-        resultadoRecta();
-
     }
 }

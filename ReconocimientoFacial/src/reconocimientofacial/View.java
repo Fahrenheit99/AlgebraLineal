@@ -12,6 +12,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;
@@ -30,16 +31,23 @@ public class View extends javax.swing.JFrame {
     public static double[][] distancias;
     int actualImage;
     int actualClick;
-    public static double[][] rectas;
+    public static ArrayList<String> nombres = new ArrayList<>();
 
     /**
      * Creates new form View
      */
     public View() {
         initComponents();
+        jLabel1.setVisible(false);
+        nombresBOX.setVisible(false);
         imagenes = new int[6][11][2];
+        nombresBOX.addItem( "Tom Cruise");
+        nombresBOX.addItem("Brad Pitt");
+        nombresBOX.addItem("Keanu Reeves");
+        nombresBOX.addItem("Keira Knightley");
+        nombresBOX.addItem("Felicity Jones");
+        nombresBOX.addItem("Adele");
         distancias = new double[6][55];
-        rectas = new double[6][2];
         actualImage = 0;
         actualClick = 0;
         this.setLocationRelativeTo(null);
@@ -57,6 +65,8 @@ public class View extends javax.swing.JFrame {
         btnEscogerImagen = new javax.swing.JButton();
         label = new javax.swing.JLabel();
         labelImagen = new javax.swing.JLabel();
+        nombresBOX = new javax.swing.JComboBox<>();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -78,6 +88,8 @@ public class View extends javax.swing.JFrame {
             }
         });
 
+        jLabel1.setText("Escoja el actor o actriz:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -88,23 +100,35 @@ public class View extends javax.swing.JFrame {
                         .addContainerGap()
                         .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 491, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(163, 163, 163)
-                        .addComponent(btnEscogerImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(69, 69, 69)
+                        .addComponent(labelImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(70, 70, 70)
-                        .addComponent(labelImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(52, 52, 52)
+                        .addComponent(btnEscogerImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(109, 109, 109)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(nombresBOX, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnEscogerImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(29, 29, 29)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap(39, Short.MAX_VALUE)
+                        .addComponent(btnEscogerImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(48, 48, 48))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(40, 40, 40)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(nombresBOX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(labelImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(38, 38, 38))
+                .addGap(19, 19, 19))
         );
 
         pack();
@@ -113,6 +137,8 @@ public class View extends javax.swing.JFrame {
     private void btnEscogerImagenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEscogerImagenActionPerformed
         // TODO add your handling code here:
         abrirImagen();
+        jLabel1.setVisible(true);
+        nombresBOX.setVisible(true);
     }//GEN-LAST:event_btnEscogerImagenActionPerformed
 
     private void labelImagenMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelImagenMousePressed
@@ -124,7 +150,6 @@ public class View extends javax.swing.JFrame {
             if (actualImage == 5) {
                 calcularDistanciasBase();
                 normalizar();
-                calcularRecta();
                 try {
                     Save();
                 } catch (FileNotFoundException ex) {
@@ -135,6 +160,7 @@ public class View extends javax.swing.JFrame {
                 view.setVisible(true);
             } else {
                 label.setText("Siga Con la Siguiete Imagen");
+                nombres.add((String) nombresBOX.getSelectedItem());
                 actualImage++;
                 actualClick = 0;
                 abrirImagen();
@@ -181,8 +207,10 @@ public class View extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEscogerImagen;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel label;
     private javax.swing.JLabel labelImagen;
+    private javax.swing.JComboBox<String> nombresBOX;
     // End of variables declaration//GEN-END:variables
 
     public void abrirImagen() {
@@ -199,7 +227,7 @@ public class View extends javax.swing.JFrame {
     }
 
     private void calcularDistanciasBase() {
-        
+
         for (int i = 0; i < 6; i++) {
             int cont = 0;
             for (int x = 0; x < 11; x++) {
@@ -213,46 +241,27 @@ public class View extends javax.swing.JFrame {
         }
     }
 
-    private void calcularRecta() {
-        for (int i = 0; i < 6; i++) {
-            double sumatoriaxy = 0;
-            double sumatoriax2 = 0;
-            double sumatoriax = 0;
-            double sumatoriay = 0;
-            for (int x = 0; x < 11; x++) {
-                sumatoriax += imagenes[i][x][0];
-                sumatoriay += imagenes[i][x][1];
-                sumatoriaxy += imagenes[i][x][0] * imagenes[i][x][1];
-                sumatoriax2 += imagenes[i][x][0] * imagenes[i][x][0];
-            }
-            double m = (sumatoriaxy - (sumatoriax * sumatoriay / 11)) / (sumatoriax2 - ((sumatoriax * sumatoriax) / 11));
-            double b = (sumatoriay / 11) - (m * (sumatoriax / 11));
-            rectas[i][0] = m;
-            rectas[i][1] = b;
-        }
-    }
-
     private void Save() throws FileNotFoundException {
         try (PrintWriter outA = new PrintWriter("distancias.xml")) {
             String archivo = xstream.toXML(distancias);
             outA.println(archivo);
         }
-        try (PrintWriter outA = new PrintWriter("rectas.xml")) {
-            String archivo = xstream.toXML(rectas);
+        try (PrintWriter outA = new PrintWriter("nombres.xml")) {
+            String archivo = xstream.toXML(nombres);
             outA.println(archivo);
         }
     }
 
     private void normalizar() {
         for (int i = 0; i < 6; i++) {
-//            double maximo = 0;
-//            for (int x = 0; x < 55; x++) {
-//                if (distancias[i][x] > maximo) {
-//                    maximo = distancias[i][x];
-//                }
-//            }
+            double maximo = 0;
             for (int x = 0; x < 55; x++) {
-                distancias[i][x] = distancias[i][x] / distancias[i][45];
+                if (distancias[i][x] > maximo) {
+                    maximo = distancias[i][x];
+                }
+            }
+            for (int x = 0; x < 55; x++) {
+                distancias[i][x] = distancias[i][x] / maximo;
             }
         }
     }
